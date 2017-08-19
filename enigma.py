@@ -74,7 +74,8 @@ class EnigmaDevice(MediaPlayerDevice):
         self._selected_source = ''
         self._source_names = {}
         self._sources = {}
-        self.handle_base_auth()
+        if self._password != DEFAULT_PASSWORD:
+            self.handle_base_auth()
         self.load_sources()
 
     def handle_base_auth(self):
