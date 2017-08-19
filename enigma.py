@@ -1,10 +1,12 @@
 """Support for Enigma2 Settopboxes."""
+import asyncio
 from datetime import timedelta
 import urllib.request
 import urllib.parse
 from urllib.error import URLError, HTTPError
 import voluptuous as vol
 
+from homeassistant.util import Throttle
 from homeassistant.components.media_player import (
     SUPPORT_SELECT_SOURCE, MediaPlayerDevice, PLATFORM_SCHEMA,
     SUPPORT_TURN_OFF, SUPPORT_TURN_ON,
@@ -12,10 +14,9 @@ from homeassistant.components.media_player import (
 from homeassistant.const import (
     CONF_HOST, STATE_OFF, STATE_ON, STATE_UNKNOWN, CONF_NAME, CONF_PORT,
     CONF_USERNAME, CONF_PASSWORD, CONF_TIMEOUT)
-from homeassistant.util import Throttle
 import homeassistant.helpers.config_validation as cv
 
-REQUIREMENTS = ['beautifulsoup4==4.5.3']
+REQUIREMENTS = ['beautifulsoup4==4.6.0']
 
 # Return cached results if last scan was less then this time ago.
 MIN_TIME_BETWEEN_SCANS = timedelta(seconds=10)
@@ -41,7 +42,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): cv.socket_timeout,
 })
 
-
+@asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Setup the Enigma platform."""
     enigma = EnigmaDevice(config.get(CONF_NAME),
@@ -88,10 +89,7 @@ class EnigmaDevice(MediaPlayerDevice):
         """Load sources from first bouquet."""
         from bs4 import BeautifulSoup
         reference = urllib.parse.quote_plus(self.get_bouquet_reference())
-        try:
-            epgbouquet_xml = self.request_call('/web/epgnow?bRef=' + reference)
-        except (HTTPError, URLError, ConnectionRefusedError):
-            return False
+        epgbouquet_xml = self.request_call('/web/epgnow?bRef=' + reference)
 
         soup = BeautifulSoup(epgbouquet_xml, 'html.parser')
         src_names = soup.find_all('e2eventservicename')
@@ -104,10 +102,7 @@ class EnigmaDevice(MediaPlayerDevice):
     def get_bouquet_reference(self):
         """Get first bouquet reference."""
         from bs4 import BeautifulSoup
-        try:
-            bouquets_xml = self.request_call('/web/bouquets')
-        except (HTTPError, URLError, ConnectionRefusedError):
-            return False
+        bouquets_xml = self.request_call('/web/bouquets')
 
         soup = BeautifulSoup(bouquets_xml, 'html.parser')
         return soup.find('e2servicereference').renderContents().decode('UTF8')
@@ -115,16 +110,16 @@ class EnigmaDevice(MediaPlayerDevice):
     def request_call(self, url):
         """Call web API request."""
         uri = 'http://' + self._host + url
-        return urllib.request.urlopen(uri, timeout=10).read().decode('UTF8')
+        try:
+            return urllib.request.urlopen(uri, timeout=10).read().decode('UTF8')
+        except (HTTPError, URLError, ConnectionRefusedError):
+            return False
 
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self):
         """Get the latest details from the device."""
         from bs4 import BeautifulSoup
-        try:
-            powerstate_xml = self.request_call('/web/powerstate')
-        except (HTTPError, URLError, ConnectionRefusedError):
-            return False
+        powerstate_xml = self.request_call('/web/powerstate')
 
         powerstate_soup = BeautifulSoup(powerstate_xml, 'html.parser')
         pwstate = powerstate_soup.e2instandby.renderContents().decode('UTF8')
@@ -194,7 +189,7 @@ class EnigmaDevice(MediaPlayerDevice):
         return self._muted
 
     @property
-    def supported_media_commands(self):
+    def supported_features(self):
         """Flag of media commands that are supported."""
         return SUPPORT_ENIGMA
 
@@ -213,38 +208,28 @@ class EnigmaDevice(MediaPlayerDevice):
         """List of available input sources."""
         return self._source_names
 
-    def select_source(self, source):
+    @asyncio.coroutine
+    def async_select_source(self, source):
         """Select input source."""
-        try:
-            self.request_call('/web/zap?sRef=' + self._sources[source])
-        except (HTTPError, URLError, ConnectionRefusedError):
-            return False
+        self.request_call('/web/zap?sRef=' + self._sources[source])
 
-    def set_volume_level(self, volume):
+    @asyncio.coroutine
+    def async_set_volume_level(self, volume):
         """Set volume level, range 0..1."""
-        try:
-            volset = str(round(volume * MAX_VOLUME))
-            self.request_call('/web/vol?set=set' + volset)
-        except (HTTPError, URLError, ConnectionRefusedError):
-            return False
-
-    def mute_volume(self, mute):
+        volset = str(round(volume * MAX_VOLUME))
+        self.request_call('/web/vol?set=set' + volset)
+    
+    @asyncio.coroutine
+    def async_mute_volume(self, mute):
         """Mute or unmute media player."""
-        try:
-            self.request_call('/web/vol?set=mute')
-        except (HTTPError, URLError, ConnectionRefusedError):
-            return False
-
-    def turn_on(self):
+        self.request_call('/web/vol?set=mute')
+    
+    @asyncio.coroutine
+    def async_turn_on(self):
         """Turn the media player on."""
-        try:
-            self.request_call('/web/powerstate?newstate=4')
-        except (HTTPError, URLError, ConnectionRefusedError):
-            return False
+        self.request_call('/web/powerstate?newstate=4')
 
-    def turn_off(self):
+    @asyncio.coroutine
+    def async_turn_off(self):
         """Turn off media player."""
-        try:
-            self.request_call('/web/powerstate?newstate=5')
-        except (HTTPError, URLError, ConnectionRefusedError):
-            return False
+        self.request_call('/web/powerstate?newstate=5')
