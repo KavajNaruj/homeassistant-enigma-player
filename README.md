@@ -23,7 +23,7 @@ You must install OpenWebif from your enigma2 image.
 # Configuration Example:
 To use this custom component, place the file `enigma.py` inside your folder `~/custom_components/media_player` which is inside your Home Assistant configuration directory.
 
-```python
+``` python
 - platform: enigma
     host: 192.168.1.50
     port: 80
@@ -40,12 +40,13 @@ To use this custom component, place the file `enigma.py` inside your folder `~/c
     icon: mdi:satellite-variant
     username: root
     password: !secret enigma_password
-
+```
 # Contact
 joao.amaro@gmail.com
 
 # License
 
 # References
+
 [1]: https://home-assistant.io
 
