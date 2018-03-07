@@ -41,6 +41,13 @@ To use this custom component, place the file `enigma.py` inside your folder `~/c
     username: root
     password: !secret enigma_password
 ```
+# Screenshots
+
+![Channel example 1](../master/screenshots/1.png)
+![Channel example 2](../master/screenshots/2.png)
+![In detail](../master/screenshots/3.png)
+![Change source](../master/screenshots/4.png)
+
 # Contact
 joao.amaro@gmail.com
 
