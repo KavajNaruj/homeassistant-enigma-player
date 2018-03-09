@@ -43,7 +43,7 @@ DEFAULT_NAME = 'Enigma2 Satelite'
 DEFAULT_PORT = 80
 DEFAULT_TIMEOUT = 30
 DEFAULT_USERNAME = 'root'
-DEFAULT_PASSWORD = 'password'
+DEFAULT_PASSWORD = None
 
 SUPPORT_ENIGMA = SUPPORT_VOLUME_SET | SUPPORT_VOLUME_MUTE | \
                  SUPPORT_TURN_ON | SUPPORT_TURN_OFF | \
@@ -102,13 +102,17 @@ class EnigmaDevice(MediaPlayerDevice):
         self._picon_url = None
         self._source_names = {}
         self._sources = {}
-        """ Opener for http auth connection """
+        """ Opener for http connection """
         self._opener = False;
-        if self._password != DEFAULT_PASSWORD:
+
+        if not (self._password is None):
             """ Handle HTTP Auth. """
             mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-            mgr.add_password(None, self._host, self._username, self._password)
+            mgr.add_password(None, self._host+":"+str(self._port), self._username, self._password)
             handler = urllib.request.HTTPBasicAuthHandler(mgr)
+            self._opener = urllib.request.build_opener(handler)
+        else:
+            handler = urllib.request.HTTPHandler()
             self._opener = urllib.request.build_opener(handler)
 
         self.load_sources()
@@ -140,7 +144,7 @@ class EnigmaDevice(MediaPlayerDevice):
 
     def request_call(self, url):
         """Call web API request."""
-        uri = 'http://' + self._host + url
+        uri = 'http://' + self._host + ":" + str(self._port) + url
         _LOGGER.debug("Enigma: [request_call] - Call request %s ", uri)
         try:
             return self._opener.open(uri, timeout=self._timeout).read().decode('UTF8')
@@ -188,9 +192,9 @@ class EnigmaDevice(MediaPlayerDevice):
                 soup = BeautifulSoup(xml, 'html.parser')
                 eventtitle = soup.e2eventtitle.renderContents().decode('UTF8')
                 if self._password != DEFAULT_PASSWORD:
-                    self._picon_url = 'http://'+ self._username + ':' + self._password + '@' + self._host+'/picon/'+reference.replace(":","_")[:-1]+'.png'  
+                    self._picon_url = 'http://'+ self._username + ':' + self._password + '@' + self._host + ":" + str(self._port) +'/picon/'+reference.replace(":","_")[:-1]+'.png'  
                 else:
-                    self._picon_url = 'http://' + self._host+'/picon/'+reference.replace(":","_")[:-1]+'.png'  
+                    self._picon_url = 'http://' + self._host + ":" + str(self._port) + '/picon/'+reference.replace(":","_")[:-1]+'.png'  
                 _LOGGER.debug("Enigma: [update] - Eventtitle for host %s = %s", self._host, eventtitle)
 
             """ Check volume and if is muted and update self variables """
