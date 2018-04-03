@@ -20,9 +20,22 @@ You must install OpenWebif from your enigma2 image.
   - 0.2.7
   - 1.3.0
 
-# Configuration Example:
+# Install:
 To use this custom component, place the file `enigma.py` inside your folder `~/custom_components/media_player` which is inside your Home Assistant configuration directory.
 
+You need to install (if not yet) the BeautifoulSoup module for Pyhton.
+
+Activate the virtual environment:
+``` 
+$ source bin/activate
+```
+
+Install BeautifoulSoup:
+``` 
+$ python3 -m pip install BeautifoulSoup4
+```
+
+# Configuration Example:
 ``` python
 - platform: enigma
     host: 192.168.1.50
