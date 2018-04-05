@@ -1,8 +1,9 @@
 # Readme
 
-This is a custom component for the media_player component of [Home Assistant][1].
+This is a custom component for the media_player and notify components of [Home Assistant][1].
 
 It allows you to remotely control your enigma2 compatible satellite/cable receivers.
+It also allows you to send notification using the notify component.
 
 You must install OpenWebif from your enigma2 image.
 
@@ -15,13 +16,17 @@ You must install OpenWebif from your enigma2 image.
   - Current channel and current event
   - Picon from current channel
   - Supports authentication and multiple receivers
+  - Sending notifications to the box (timeout and type of message can be selected)
     
 # Tested with OpenWebif versions:
   - 0.2.7
   - 1.3.0
 
 # Install:
-To use this custom component, place the file `enigma.py` inside your folder `~/custom_components/media_player` which is inside your Home Assistant configuration directory.
+To use the media_player custom component, place the file `enigma.py` from the folder media_player inside your folder `~/.homeassistant/custom_components/media_player` 
+To use the notify custom component, place the file `enigma.py` from the folder media_player inside your folder `~/.homeassistant/custom_components/notify` 
+
+The custom components directory is inside your Home Assistant configuration directory.
 
 You need to install (if not yet) the BeautifoulSoup module for Pyhton.
 
@@ -35,8 +40,9 @@ Install BeautifoulSoup:
 $ python3 -m pip install BeautifoulSoup4
 ```
 
-# Configuration Example:
+# Configuration Example (for both components):
 ``` python
+media_player:
 - platform: enigma
     host: 192.168.1.50
     port: 80
@@ -45,7 +51,9 @@ $ python3 -m pip install BeautifoulSoup4
     timeout: 20
     username: root
     password: !secret enigma_password
-  - platform: enigma
+
+notify:
+- platform: enigma
     host: 192.168.1.51
     port: 80
     name: Dreambox
@@ -55,11 +63,11 @@ $ python3 -m pip install BeautifoulSoup4
     password: !secret enigma_password
 ```
 # Screenshots
-
 ![Channel example 1](../master/screenshots/1.png)
 ![Channel example 2](../master/screenshots/2.png)
 ![In detail](../master/screenshots/3.png)
 ![Change source](../master/screenshots/4.png)
+![Send notification](../master/screenshots/5.png)
 
 # Contact
 joao.amaro@gmail.com
