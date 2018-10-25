@@ -17,6 +17,7 @@ You must install OpenWebif from your enigma2 image.
   - Picon from current channel
   - Supports authentication and multiple receivers
   - Sending notifications to the box (timeout and type of message can be selected)
+  - Load sources from selected bouquet (thanks to madrian)
     
 # Tested with OpenWebif versions:
   - 0.2.7
@@ -41,6 +42,7 @@ $ python3 -m pip install BeautifoulSoup4
 ```
 
 # Configuration Example (for both components):
+By Default will load all channels from first bouquet
 ``` python
 media_player:
 - platform: enigma
@@ -62,6 +64,34 @@ notify:
     username: root
     password: !secret enigma_password
 ```
+
+# Configuration Example 2 (using a pre-defined bouquet):
+To get your bouquet references, open in your browser : http://box.ip/web/getservices
+You can find your bouquet reference from as follows:
+
+Example
+	```
+	1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet BOUQUET_NAME_HERE
+	```
+In my case, if I want to load all channels from bouquet Sky Deutschland I have to look for:
+	```
+	1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.dbe1e.tv" ORDER BY bouquet Sky Deutschland
+	```
+Then copy the entire string, removing the bouquet name from the end
+Example, where I want to load all bouques from the Sky Deutschalnd bouquet:
+``` python
+media_player:
+- platform: enigma
+    host: 192.168.1.50
+    port: 80
+    name: Gigablue
+    icon: mdi:satellite-variant
+    timeout: 20
+    username: root
+    password: !secret enigma_password
+    bouquet: '1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.dbe1e.tv" ORDER BY bouquet'
+
+
 # Screenshots
 ![Channel example 1](../master/screenshots/1.png)
 ![Channel example 2](../master/screenshots/2.png)

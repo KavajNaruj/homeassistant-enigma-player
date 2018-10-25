@@ -22,7 +22,7 @@ from homeassistant.components.media_player import (
     SUPPORT_TURN_OFF, SUPPORT_TURN_ON,SUPPORT_VOLUME_MUTE, SUPPORT_VOLUME_SET, SUPPORT_VOLUME_STEP, 
     MediaPlayerDevice)
 from homeassistant.const import (
-    CONF_HOST, CONF_NAME, CONF_PORT,CONF_USERNAME, CONF_PASSWORD, CONF_TIMEOUT, 
+    CONF_HOST, CONF_NAME, CONF_PORT,CONF_USERNAME, CONF_PASSWORD, CONF_TIMEOUT,
     STATE_OFF, STATE_ON, STATE_UNKNOWN)
 import homeassistant.helpers.config_validation as cv
 
@@ -45,6 +45,8 @@ DEFAULT_TIMEOUT = 30
 DEFAULT_USERNAME = 'root'
 DEFAULT_PASSWORD = None
 
+CONF_BOUQUET = 'bouquet'
+
 SUPPORT_ENIGMA = SUPPORT_VOLUME_SET | SUPPORT_VOLUME_MUTE | \
                  SUPPORT_TURN_ON | SUPPORT_TURN_OFF | \
                  SUPPORT_SELECT_SOURCE | SUPPORT_NEXT_TRACK | \
@@ -59,6 +61,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_PASSWORD, default=DEFAULT_PASSWORD): cv.string,
     vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.port,
     vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): cv.socket_timeout,
+    vol.Optional(CONF_BOUQUET): cv.string,
 })
 
 @asyncio.coroutine
@@ -75,7 +78,8 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
                           config.get(CONF_PORT),
                           config.get(CONF_USERNAME),
                           config.get(CONF_PASSWORD),
-                          config.get(CONF_TIMEOUT))
+                          config.get(CONF_TIMEOUT),
+                          config.get(CONF_BOUQUET))
 
         _LOGGER.info("Enigma receiver at host %s initialized.", config.get(CONF_HOST))
         hass.data[DATA_ENIGMA].append(enigma)
@@ -87,7 +91,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 class EnigmaDevice(MediaPlayerDevice):
     """Representation of a Enigma device."""
 
-    def __init__(self, name, host, port, username, password, timeout):
+    def __init__(self, name, host, port, username, password, timeout, bouquet):
         """Initialize the Enigma device."""
         self._name = name
         self._host = host
@@ -95,6 +99,7 @@ class EnigmaDevice(MediaPlayerDevice):
         self._username = username
         self._password = password
         self._timeout = timeout
+        self._bouquet = bouquet
         self._pwstate = True
         self._volume = 0
         self._muted = False
@@ -121,20 +126,40 @@ class EnigmaDevice(MediaPlayerDevice):
 
 
     def load_sources(self):
-        """Load sources from first bouquet."""
-        reference = urllib.parse.quote_plus(self.get_bouquet_reference())
-        _LOGGER.debug("Enigma: [load_sources] - Request reference %s ", reference)
-        epgbouquet_xml = self.request_call('/web/epgnow?bRef=' + reference)
 
-        """ Channels name """
-        soup = BeautifulSoup(epgbouquet_xml, 'html.parser')
-        src_names = soup.find_all('e2eventservicename')
-        self._source_names = [src_name.string for src_name in src_names]
+        if self._bouquet:
 
-        """ Channels reference """
-        src_references = soup.find_all('e2eventservicereference')
-        sources = [src_reference.string for src_reference in src_references]
-        self._sources = dict(zip(self._source_names, sources))
+            """Load user set bouquet."""
+
+            _LOGGER.debug("Enigma: [load_sources] - Request user bouquet %s ", self._bouquet)
+            epgbouquet_xml = self.request_call('/web/epgnow?bRef=' + urllib.parse.quote_plus(self._bouquet))
+
+            """ Channels name """
+            soup = BeautifulSoup(epgbouquet_xml, 'html.parser')
+            src_names = soup.find_all('e2eventservicename')
+            self._source_names = [src_name.string for src_name in src_names]
+
+            """ Channels reference """
+            src_references = soup.find_all('e2eventservicereference')
+            sources = [src_reference.string for src_reference in src_references]
+            self._sources = dict(zip(self._source_names, sources))
+
+
+        else:
+            """Load sources from first bouquet."""
+            reference = urllib.parse.quote_plus(self.get_bouquet_reference())
+            _LOGGER.debug("Enigma: [load_sources] - Request reference %s ", reference)
+            epgbouquet_xml = self.request_call('/web/epgnow?bRef=' + reference)
+
+            """ Channels name """
+            soup = BeautifulSoup(epgbouquet_xml, 'html.parser')
+            src_names = soup.find_all('e2eventservicename')
+            self._source_names = [src_name.string for src_name in src_names]
+
+            """ Channels reference """
+            src_references = soup.find_all('e2eventservicereference')
+            sources = [src_reference.string for src_reference in src_references]
+            self._sources = dict(zip(self._source_names, sources))
 
     def get_bouquet_reference(self):
         """Get first bouquet reference."""
@@ -189,7 +214,7 @@ class EnigmaDevice(MediaPlayerDevice):
 
             eventtitle = 'N/A'
             """ If we got a valid reference, check the title of the event and the picon url """
-            if reference != 'N/A':
+            if reference != 'N/A' and not reference.startswith('1:0:0:0:0:0:0:0:0:0:'):
                 xml = self.request_call('/web/epgservicenow?sRef=' + reference)
                 soup = BeautifulSoup(xml, 'html.parser')
                 eventtitle = soup.e2eventtitle.renderContents().decode('UTF8')
