@@ -101,17 +101,35 @@ media_player:
 
 # Screenshots
 Current channel (example 1)
+
 ![Channel example 1](../master/screenshots/1.png)
+
+
 Current channel (example 2)
+
 ![Channel example 2](../master/screenshots/2.png)
+
+
 Current channel options
+
 ![In detail](../master/screenshots/3.png)
+
+
 Change channel from bouquet list
+
 ![Change source](../master/screenshots/4.png)
+
+
 Call service to send a notification
+
 ![Send notification](../master/screenshots/5.png)
+
+
 Call service to change to specified channel number
+
 ![Change channel number](../master/screenshots/6.png)
+
+
 
 # Contact
 joao.amaro@gmail.com
