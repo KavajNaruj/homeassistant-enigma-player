@@ -13,6 +13,7 @@ You must install OpenWebif from your enigma2 image.
   - Loads all sources from first bouquet. (Current channel and possibility to change channels)
   - Volume regulation (mute, set, step)
   - Change channel (Selecting from source list or via Right/Left - from remote controller)
+  - Change channel (using channel number)
   - Current channel and current event
   - Picon from current channel
   - Supports authentication and multiple receivers
@@ -99,11 +100,18 @@ media_player:
 
 
 # Screenshots
+Current channel (example 1)
 ![Channel example 1](../master/screenshots/1.png)
+Current channel (example 2)
 ![Channel example 2](../master/screenshots/2.png)
+Current channel options
 ![In detail](../master/screenshots/3.png)
+Change channel from bouquet list
 ![Change source](../master/screenshots/4.png)
+Call service to send a notification
 ![Send notification](../master/screenshots/5.png)
+Call service to change to specified channel number
+![Change channel number](../master/screenshots/6.png)
 
 # Contact
 joao.amaro@gmail.com

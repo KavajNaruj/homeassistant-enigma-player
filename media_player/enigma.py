@@ -1,25 +1,27 @@
 """
-Support for Enigma2 Settopboxes.
+Support for Enigma2 Set-top boxes.
 
 For more details, please refer to github at https://github.com/cinzas/homeassistant-enigma-player
 
 This is a branch from https://github.com/KavajNaruj/homeassistant-enigma-player
 """
-
+# Imports 
 import logging
 import asyncio
 import urllib.request
 import urllib.parse
 import voluptuous as vol
 
+# Dependecies 
 from urllib.error import URLError, HTTPError
 from datetime import timedelta
 from bs4 import BeautifulSoup
 
+# From homeassitant
 from homeassistant.util import Throttle
 from homeassistant.components.media_player import (
     MEDIA_TYPE_TVSHOW, MEDIA_TYPE_VIDEO, SUPPORT_SELECT_SOURCE, PLATFORM_SCHEMA, SUPPORT_NEXT_TRACK, SUPPORT_PREVIOUS_TRACK,
-    SUPPORT_TURN_OFF, SUPPORT_TURN_ON,SUPPORT_VOLUME_MUTE, SUPPORT_VOLUME_SET, SUPPORT_VOLUME_STEP, 
+    SUPPORT_TURN_OFF, SUPPORT_TURN_ON,SUPPORT_VOLUME_MUTE, SUPPORT_VOLUME_SET, SUPPORT_VOLUME_STEP, SUPPORT_PLAY, SUPPORT_PLAY_MEDIA,
     MediaPlayerDevice)
 from homeassistant.const import (
     CONF_HOST, CONF_NAME, CONF_PORT,CONF_USERNAME, CONF_PASSWORD, CONF_TIMEOUT,
@@ -27,6 +29,7 @@ from homeassistant.const import (
 import homeassistant.helpers.config_validation as cv
 
 
+# Requirements 
 REQUIREMENTS = ['beautifulsoup4==4.6.0']
 
 # Logging
@@ -36,7 +39,7 @@ _LOGGER = logging.getLogger(__name__)
 MIN_TIME_BETWEEN_SCANS = timedelta(seconds=10)
 MIN_TIME_BETWEEN_FORCED_SCANS = timedelta(seconds=5)
 
-
+# DEFAULTS
 DATA_ENIGMA = 'enigma'
 
 DEFAULT_NAME = 'Enigma2 Satelite'
@@ -50,10 +53,12 @@ CONF_BOUQUET = 'bouquet'
 SUPPORT_ENIGMA = SUPPORT_VOLUME_SET | SUPPORT_VOLUME_MUTE | \
                  SUPPORT_TURN_ON | SUPPORT_TURN_OFF | \
                  SUPPORT_SELECT_SOURCE | SUPPORT_NEXT_TRACK | \
-                 SUPPORT_PREVIOUS_TRACK | SUPPORT_VOLUME_STEP
+                 SUPPORT_PREVIOUS_TRACK | SUPPORT_VOLUME_STEP | \
+                 SUPPORT_PLAY | SUPPORT_PLAY_MEDIA
  
 MAX_VOLUME = 100
 
+# PLATFORM SCHEMA
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_HOST): cv.string,
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
@@ -64,6 +69,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_BOUQUET): cv.string,
 })
 
+# SETUP PLATFORM
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Setup the Enigma platform."""
@@ -87,7 +93,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
     async_add_devices(enigmas, update_before_add=True)
 
-
+# Enigma Device
 class EnigmaDevice(MediaPlayerDevice):
     """Representation of a Enigma device."""
 
@@ -109,7 +115,8 @@ class EnigmaDevice(MediaPlayerDevice):
         self._sources = {}
         """ Opener for http connection """
         self._opener = False;
-
+        
+        # Check if is password enabled
         if not (self._password is None):
             """ Handle HTTP Auth. """
             mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
@@ -125,6 +132,7 @@ class EnigmaDevice(MediaPlayerDevice):
         self.load_sources()
 
 
+    # Load channels from specified bouquet or load sources from first available bouquet
     def load_sources(self):
 
         if self._bouquet:
@@ -169,6 +177,7 @@ class EnigmaDevice(MediaPlayerDevice):
         soup = BeautifulSoup(bouquets_xml, 'html.parser')
         return soup.find('e2servicereference').renderContents().decode('UTF8')
 
+    # API requests
     def request_call(self, url):
         """Call web API request."""
         uri = 'http://' + self._host + ":" + str(self._port) + url
@@ -179,6 +188,7 @@ class EnigmaDevice(MediaPlayerDevice):
             _LOGGER.exception("Enigma: [request_call] - Error connecting to remote enigma %s: %s ", self._host, HTTPError.code)
             return False
 
+    # Component Update
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self):
         """Get the latest details from the device."""
@@ -240,11 +250,13 @@ class EnigmaDevice(MediaPlayerDevice):
 
         return True
 
+# GET - Name
     @property
     def name(self):
         """Return the name of the device."""
         return self._name
 
+# GET - State 
     @property
     def state(self):
         """Return the state of the device."""
@@ -255,95 +267,141 @@ class EnigmaDevice(MediaPlayerDevice):
 
         return STATE_UNKNOWN
 
+# GET - Volume Level
     @property
     def volume_level(self):
         """Volume level of the media player (0..1)."""
         return self._volume
 
+# GET - Muted  
     @property
     def is_volume_muted(self):
         """Boolean if volume is currently muted."""
         return self._muted
 
+# GET - Features
     @property
     def supported_features(self):
         """Flag of media commands that are supported."""
         return SUPPORT_ENIGMA
 
+# GET - Content type
     @property
     def media_content_type(self):
         """Content type of current playing media."""
         return MEDIA_TYPE_TVSHOW
 
+# GET - Content id - Current Channel name
     @property
     def media_content_id(self):
         """Service Ref of current playing media."""
         return self._selected_source
 
+# GET - Media title - Current Channel name
     @property
     def media_title(self):
         """Title of current playing media."""
         return self._selected_source
 
+# GET - Content picon - Current Channel Picon
+# /picon directory must exist in enigma2 box (use symlink if not)
     @property
     def media_image_url(self):
         """Title of current playing media."""
         _LOGGER.debug("Enigma: [media_image_url] - %s", self._picon_url)
         return self._picon_url
 
+# GET - Current channel - Current Channel Name
     @property
     def source(self):
         """Return the current input source."""
         return self._selected_source
 
+# GET - Channel list - Channel names from current bouquet
     @property
     def source_list(self):
         """List of available input sources."""
         return self._source_names
 
+# SET - Change channel - From dropbox menu
     @asyncio.coroutine
     def async_select_source(self, source):
         """Select input source."""
         _LOGGER.debug("Enigma: [async_select_source] - Change source channel")
         self.request_call('/web/zap?sRef=' + self._sources[source])
     
+# SET - Volume up
     @asyncio.coroutine
     def async_volume_up(self):
         """Set volume level up"""
         self.request_call('/web/vol?set=up')
 
+# SET - Volume down
     @asyncio.coroutine
     def async_volume_down(self):
         """Set volume level down"""
         self.request_call('/web/vol?set=down')
 
+# SET - Volume level
     @asyncio.coroutine
     def async_set_volume_level(self, volume):
         """Set volume level, range 0..1."""
         volset = str(round(volume * MAX_VOLUME))
         self.request_call('/web/vol?set=set' + volset)
     
+# SET - Volume mute
     @asyncio.coroutine
     def async_mute_volume(self, mute):
         """Mute or unmute media player."""
         self.request_call('/web/vol?set=mute')
-    
+
+# SET - Change to channel number
+    @asyncio.coroutine
+    def async_play_media(self, media_id, media_type, **kwargs):
+        # media_id should only be a channel number
+        try:
+            cv.positive_int(media_id)
+        except vol.Invalid:
+            _LOGGER.error('Media ID must be positive integer')
+            return
+        # Hack to map remote key press
+        # 2   Key "1"
+        # 3   Key "2"
+        # 4   Key "3"
+        # 5   Key "4"
+        # 6   Key "5"
+        # 7   Key "6"
+        # 8   Key "7"
+        # 9   Key "8"
+        # 10  Key "9"
+        # 11  Key "0"
+        for digit in media_id:
+            if digit=='0' :
+                channel_digit = '11'
+            else:
+                channel_digit = int(digit)+1
+            self.request_call('/web/remotecontrol?command='+str(channel_digit))
+
+# SET - Turn on
     @asyncio.coroutine
     def async_turn_on(self):
         """Turn the media player on."""
         self.request_call('/web/powerstate?newstate=4')
         self.update()
 
+# SET - Turn of
     @asyncio.coroutine
     def async_turn_off(self):
         """Turn off media player."""
         self.request_call('/web/powerstate?newstate=5')
 
+# SET - Next channel
     @asyncio.coroutine
     def async_media_next_track(self):
         """Change to next channel"""
         self.request_call('/web/remotecontrol?command=106')
 
+# SET - Previous channel
     @asyncio.coroutine
     def async_media_previous_track(self):
         """Change to previous channel"""
