@@ -15,7 +15,7 @@ from urllib.error import URLError, HTTPError
 from datetime import timedelta
 
 from homeassistant.const import (
-    CONF_NAME, CONF_HOST, CONF_PORT,CONF_USERNAME, CONF_PASSWORD)
+    CONF_NAME, CONF_HOST, CONF_PORT, CONF_USERNAME, CONF_PASSWORD)
 from homeassistant.components.notify import (
     ATTR_DATA, PLATFORM_SCHEMA,
     BaseNotificationService)
@@ -54,12 +54,13 @@ def async_get_service(hass, config, discovery_info=None):
     """Setup the Enigma platform."""
     if config.get(CONF_HOST) is not None:
         enigma = EnigmaNotify(config.get(CONF_NAME),
-                          config.get(CONF_HOST),
-                          config.get(CONF_PORT),
-                          config.get(CONF_USERNAME),
-                          config.get(CONF_PASSWORD))
+                              config.get(CONF_HOST),
+                              config.get(CONF_PORT),
+                              config.get(CONF_USERNAME),
+                              config.get(CONF_PASSWORD))
 
-        _LOGGER.info("[Enigma Notify] Enigma receiver at host %s initialized.", config.get(CONF_HOST))
+        _LOGGER.info("[Enigma Notify] Enigma receiver at host %s initialized.",
+                     config.get(CONF_HOST))
     return enigma
 
 
@@ -74,10 +75,10 @@ class EnigmaNotify(BaseNotificationService):
         self._username = username
         self._password = password
         """ Opener for http connection """
-        self._opener = False;
+        self._opener = False
 
         """ With auth """
-        if not (self._password is None):
+        if not self._password is None:
             """ Handle HTTP Auth. """
             mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
             mgr.add_password(None, self._host+":"+str(self._port), self._username, self._password)
@@ -96,7 +97,8 @@ class EnigmaNotify(BaseNotificationService):
         try:
             return self._opener.open(uri, timeout=10).read().decode('UTF8')
         except (HTTPError, URLError, ConnectionRefusedError):
-            _LOGGER.exception("Enigma: [request_call] - Error connecting to remote enigma %s: %s ", self._host, HTTPError.code)
+            _LOGGER.exception("Enigma: [request_call] - Error connecting to remote enigma %s: %s ",\
+                              self._host, HTTPError.code)
             return False
 
 
@@ -112,10 +114,10 @@ class EnigmaNotify(BaseNotificationService):
                     displaytime = data['displaytime']
                 if 'messagetype' in data:
                     messagetype = data['messagetype']
-        
-            _LOGGER.debug("Enigma notify service: [async_send_message] - Sending Message %s (timeout=%s and type=%s", message, displaytime, messagetype)
-            self.request_call('/web/message?text=' + message.replace(" ","%20") + '&type=' + messagetype + '&timeout=' + displaytime )
+
+            _LOGGER.debug("Enigma notify service: [async_send_message] - Sending Message %s \
+                           (timeout=%s and type=%s", message, displaytime, messagetype)
+            self.request_call('/web/message?text=' + message.replace(" ", "%20") + '&type=' +\
+                              messagetype + '&timeout=' + displaytime)
         except subprocess.SubprocessError:
             _LOGGER.error("Enigma notify service: [Exception raised]")
-
-

@@ -5,25 +5,26 @@ For more details, please refer to github at https://github.com/cinzas/homeassist
 
 This is a branch from https://github.com/KavajNaruj/homeassistant-enigma-player
 """
-# Imports 
+#Imports
 import logging
 import asyncio
 import urllib.request
 import urllib.parse
 import voluptuous as vol
 
-# Dependecies 
+# Dependecies
 from urllib.error import URLError, HTTPError
 from datetime import timedelta
 
 # From homeassitant
 from homeassistant.util import Throttle
 from homeassistant.components.media_player import (
-    MEDIA_TYPE_TVSHOW, MEDIA_TYPE_VIDEO, SUPPORT_SELECT_SOURCE, PLATFORM_SCHEMA, SUPPORT_NEXT_TRACK, SUPPORT_PREVIOUS_TRACK,
-    SUPPORT_TURN_OFF, SUPPORT_TURN_ON,SUPPORT_VOLUME_MUTE, SUPPORT_VOLUME_SET, SUPPORT_VOLUME_STEP, SUPPORT_PLAY, SUPPORT_PLAY_MEDIA,
+    MEDIA_TYPE_TVSHOW, MEDIA_TYPE_VIDEO, SUPPORT_SELECT_SOURCE, PLATFORM_SCHEMA, SUPPORT_NEXT_TRACK,
+    SUPPORT_PREVIOUS_TRACK, SUPPORT_TURN_OFF, SUPPORT_TURN_ON, SUPPORT_VOLUME_MUTE,
+    SUPPORT_VOLUME_SET, SUPPORT_VOLUME_STEP, SUPPORT_PLAY, SUPPORT_PLAY_MEDIA,
     MediaPlayerDevice)
 from homeassistant.const import (
-    CONF_HOST, CONF_NAME, CONF_PORT,CONF_USERNAME, CONF_PASSWORD, CONF_TIMEOUT,
+    CONF_HOST, CONF_NAME, CONF_PORT, CONF_USERNAME, CONF_PASSWORD, CONF_TIMEOUT,
     STATE_OFF, STATE_ON, STATE_UNKNOWN)
 import homeassistant.helpers.config_validation as cv
 
@@ -53,7 +54,7 @@ SUPPORT_ENIGMA = SUPPORT_VOLUME_SET | SUPPORT_VOLUME_MUTE | \
                  SUPPORT_SELECT_SOURCE | SUPPORT_NEXT_TRACK | \
                  SUPPORT_PREVIOUS_TRACK | SUPPORT_VOLUME_STEP | \
                  SUPPORT_PLAY | SUPPORT_PLAY_MEDIA
- 
+
 MAX_VOLUME = 100
 
 # PLATFORM SCHEMA
@@ -81,12 +82,12 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
     if config.get(CONF_HOST) is not None:
         enigma = EnigmaDevice(config.get(CONF_NAME),
-                          config.get(CONF_HOST),
-                          config.get(CONF_PORT),
-                          config.get(CONF_USERNAME),
-                          config.get(CONF_PASSWORD),
-                          config.get(CONF_TIMEOUT),
-                          config.get(CONF_BOUQUET))
+                              config.get(CONF_HOST),
+                              config.get(CONF_PORT),
+                              config.get(CONF_USERNAME),
+                              config.get(CONF_PASSWORD),
+                              config.get(CONF_TIMEOUT),
+                              config.get(CONF_BOUQUET))
 
         _LOGGER.info("Enigma receiver at host %s initialized.", config.get(CONF_HOST))
         hass.data[DATA_ENIGMA].append(enigma)
@@ -115,10 +116,10 @@ class EnigmaDevice(MediaPlayerDevice):
         self._source_names = {}
         self._sources = {}
         """ Opener for http connection """
-        self._opener = False;
-        
+        self._opener = False
+
         # Check if is password enabled
-        if not (self._password is None):
+        if not self._password is None:
             """ Handle HTTP Auth. """
             mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
             mgr.add_password(None, self._host+":"+str(self._port), self._username, self._password)
@@ -143,7 +144,8 @@ class EnigmaDevice(MediaPlayerDevice):
             """Load user set bouquet."""
 
             _LOGGER.debug("Enigma: [load_sources] - Request user bouquet %s ", self._bouquet)
-            epgbouquet_xml = self.request_call('/web/epgnow?bRef=' + urllib.parse.quote_plus(self._bouquet))
+            epgbouquet_xml = self.request_call('/web/epgnow?bRef=' +
+                                               urllib.parse.quote_plus(self._bouquet))
 
             """ Channels name """
             soup = BeautifulSoup(epgbouquet_xml, 'html.parser')
@@ -190,7 +192,8 @@ class EnigmaDevice(MediaPlayerDevice):
         try:
             return self._opener.open(uri, timeout=self._timeout).read().decode('UTF8')
         except (HTTPError, URLError, ConnectionRefusedError):
-            _LOGGER.exception("Enigma: [request_call] - Error connecting to remote enigma %s: %s ", self._host, HTTPError.code)
+            _LOGGER.exception("Enigma: [request_call] - Error connecting to remote enigma %s: %s ",
+                              self._host, HTTPError.code)
             return False
 
     # Component Update
@@ -236,10 +239,14 @@ class EnigmaDevice(MediaPlayerDevice):
                 soup = BeautifulSoup(xml, 'html.parser')
                 eventtitle = soup.e2eventtitle.renderContents().decode('UTF8')
                 if self._password != DEFAULT_PASSWORD:
-                    self._picon_url = 'http://'+ self._username + ':' + self._password + '@' + self._host + ":" + str(self._port) +'/picon/'+reference.replace(":","_")[:-1]+'.png'  
+                    self._picon_url = 'http://'+ self._username + ':' + self._password+\
+                                      '@' + self._host + ":" + str(self._port) +'/picon/'+\
+                                      reference.replace(":", "_")[:-1]+'.png'
                 else:
-                    self._picon_url = 'http://' + self._host + ":" + str(self._port) + '/picon/'+reference.replace(":","_")[:-1]+'.png'  
-                _LOGGER.debug("Enigma: [update] - Eventtitle for host %s = %s", self._host, eventtitle)
+                    self._picon_url = 'http://' + self._host + ":" + str(self._port) +\
+                                      '/picon/'+reference.replace(":", "_")[:-1]+'.png'
+                _LOGGER.debug("Enigma: [update] - Eventtitle for host %s = %s", self._host,
+                              eventtitle)
 
             """ Check volume and if is muted and update self variables """
             volume_xml = self.request_call('/web/vol')
@@ -263,7 +270,7 @@ class EnigmaDevice(MediaPlayerDevice):
         """Return the name of the device."""
         return self._name
 
-# GET - State 
+# GET - State
     @property
     def state(self):
         """Return the state of the device."""
@@ -280,7 +287,7 @@ class EnigmaDevice(MediaPlayerDevice):
         """Volume level of the media player (0..1)."""
         return self._volume
 
-# GET - Muted  
+# GET - Muted
     @property
     def is_volume_muted(self):
         """Boolean if volume is currently muted."""
@@ -336,7 +343,7 @@ class EnigmaDevice(MediaPlayerDevice):
         """Select input source."""
         _LOGGER.debug("Enigma: [async_select_source] - Change source channel")
         self.request_call('/web/zap?sRef=' + self._sources[source])
-    
+
 # SET - Volume up
     @asyncio.coroutine
     def async_volume_up(self):
@@ -355,7 +362,7 @@ class EnigmaDevice(MediaPlayerDevice):
         """Set volume level, range 0..1."""
         volset = str(round(volume * MAX_VOLUME))
         self.request_call('/web/vol?set=set' + volset)
-    
+
 # SET - Volume mute
     @asyncio.coroutine
     def async_mute_volume(self, mute):
@@ -383,7 +390,7 @@ class EnigmaDevice(MediaPlayerDevice):
         # 10  Key "9"
         # 11  Key "0"
         for digit in media_id:
-            if digit=='0' :
+            if digit == '0':
                 channel_digit = '11'
             else:
                 channel_digit = int(digit)+1
@@ -413,7 +420,3 @@ class EnigmaDevice(MediaPlayerDevice):
     def async_media_previous_track(self):
         """Change to previous channel"""
         self.request_call('/web/remotecontrol?command=105')
-
-
-
-
