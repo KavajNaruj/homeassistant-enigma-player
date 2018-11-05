@@ -15,7 +15,6 @@ import voluptuous as vol
 # Dependecies 
 from urllib.error import URLError, HTTPError
 from datetime import timedelta
-from bs4 import BeautifulSoup
 
 # From homeassitant
 from homeassistant.util import Throttle
@@ -28,8 +27,7 @@ from homeassistant.const import (
     STATE_OFF, STATE_ON, STATE_UNKNOWN)
 import homeassistant.helpers.config_validation as cv
 
-
-# Requirements 
+# Requirements
 REQUIREMENTS = ['beautifulsoup4==4.6.0']
 
 # Logging
@@ -72,6 +70,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 # SETUP PLATFORM
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+    """ import BeautifulSoup """
+    from bs4 import BeautifulSoup
+
     """Setup the Enigma platform."""
     if DATA_ENIGMA not in hass.data:
         hass.data[DATA_ENIGMA] = []
@@ -134,6 +135,8 @@ class EnigmaDevice(MediaPlayerDevice):
 
     # Load channels from specified bouquet or load sources from first available bouquet
     def load_sources(self):
+        """ import BeautifulSoup """
+        from bs4 import BeautifulSoup
 
         if self._bouquet:
 
@@ -170,6 +173,8 @@ class EnigmaDevice(MediaPlayerDevice):
             self._sources = dict(zip(self._source_names, sources))
 
     def get_bouquet_reference(self):
+        """ import BeautifulSoup """
+        from bs4 import BeautifulSoup
         """Get first bouquet reference."""
         bouquets_xml = self.request_call('/web/getallservices')
         #bouquets_xml = self.request_call('/web/bouquets') # Not working in old verions
@@ -191,6 +196,8 @@ class EnigmaDevice(MediaPlayerDevice):
     # Component Update
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self):
+        """ import BeautifulSoup """
+        from bs4 import BeautifulSoup
         """Get the latest details from the device."""
         _LOGGER.info("Enigma: [update] - request for host %s (%s)", self._host, self._name)
         powerstate_xml = self.request_call('/web/powerstate')
