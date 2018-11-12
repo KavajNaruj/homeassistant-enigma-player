@@ -5,16 +5,16 @@ For more details, please refer to github at https://github.com/cinzas/homeassist
 
 This is a branch from https://github.com/KavajNaruj/homeassistant-enigma-player
 """
-#Imports
+# Dependecies
+from urllib.error import URLError, HTTPError
+from datetime import timedelta
+
+# Imports
 import logging
 import asyncio
 import urllib.request
 import urllib.parse
 import voluptuous as vol
-
-# Dependecies
-from urllib.error import URLError, HTTPError
-from datetime import timedelta
 
 # From homeassitant
 from homeassistant.util import Throttle
@@ -68,12 +68,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_BOUQUET): cv.string,
 })
 
+
 # SETUP PLATFORM
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    """ import BeautifulSoup """
-    from bs4 import BeautifulSoup
-
     """Setup the Enigma platform."""
     if DATA_ENIGMA not in hass.data:
         hass.data[DATA_ENIGMA] = []
@@ -94,6 +92,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
         enigmas.append(enigma)
 
     async_add_devices(enigmas, update_before_add=True)
+
 
 # Enigma Device
 class EnigmaDevice(MediaPlayerDevice):
@@ -119,7 +118,7 @@ class EnigmaDevice(MediaPlayerDevice):
         self._opener = False
 
         # Check if is password enabled
-        if not self._password is None:
+        if self._password is not None:
             """ Handle HTTP Auth. """
             mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
             mgr.add_password(None, self._host+":"+str(self._port), self._username, self._password)
@@ -132,7 +131,6 @@ class EnigmaDevice(MediaPlayerDevice):
             self._opener.addheaders = [('User-agent', 'Mozilla/5.0')]
 
         self.load_sources()
-
 
     # Load channels from specified bouquet or load sources from first available bouquet
     def load_sources(self):
@@ -157,7 +155,6 @@ class EnigmaDevice(MediaPlayerDevice):
             sources = [src_reference.string for src_reference in src_references]
             self._sources = dict(zip(self._source_names, sources))
 
-
         else:
             """Load sources from first bouquet."""
             reference = urllib.parse.quote_plus(self.get_bouquet_reference())
@@ -179,7 +176,7 @@ class EnigmaDevice(MediaPlayerDevice):
         from bs4 import BeautifulSoup
         """Get first bouquet reference."""
         bouquets_xml = self.request_call('/web/getallservices')
-        #bouquets_xml = self.request_call('/web/bouquets') # Not working in old verions
+        # bouquets_xml = self.request_call('/web/bouquets') # Not working in old verions
 
         soup = BeautifulSoup(bouquets_xml, 'html.parser')
         return soup.find('e2servicereference').renderContents().decode('UTF8')
@@ -239,8 +236,8 @@ class EnigmaDevice(MediaPlayerDevice):
                 soup = BeautifulSoup(xml, 'html.parser')
                 eventtitle = soup.e2eventtitle.renderContents().decode('UTF8')
                 if self._password != DEFAULT_PASSWORD:
-                    self._picon_url = 'http://'+ self._username + ':' + self._password+\
-                                      '@' + self._host + ":" + str(self._port) +'/picon/'+\
+                    self._picon_url = 'http://' + self._username + ':' + self._password + \
+                                      '@' + self._host + ":" + str(self._port) + '/picon/' +\
                                       reference.replace(":", "_")[:-1]+'.png'
                 else:
                     self._picon_url = 'http://' + self._host + ":" + str(self._port) +\

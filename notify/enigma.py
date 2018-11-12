@@ -1,24 +1,24 @@
 """
 Support for Enigma2 notifications.
 
-For more details, please refer to github at https://github.com/cinzas/homeassistant-enigma-player
+For more details,
+please refer to github at https://github.com/cinzas/homeassistant-enigma-player
 
 """
-
-import logging
-import asyncio
-import urllib.request
-import urllib.parse
-import voluptuous as vol
-
+# dependencies
 from urllib.error import URLError, HTTPError
-from datetime import timedelta
-
 from homeassistant.const import (
     CONF_NAME, CONF_HOST, CONF_PORT, CONF_USERNAME, CONF_PASSWORD)
 from homeassistant.components.notify import (
     ATTR_DATA, PLATFORM_SCHEMA,
     BaseNotificationService)
+
+# imports
+import logging
+import asyncio
+import urllib.request
+import urllib.parse
+import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 
 # Logging
@@ -49,6 +49,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.port,
 })
 
+
 @asyncio.coroutine
 def async_get_service(hass, config, discovery_info=None):
     """Setup the Enigma platform."""
@@ -78,10 +79,11 @@ class EnigmaNotify(BaseNotificationService):
         self._opener = False
 
         """ With auth """
-        if not self._password is None:
+        if self._password is not None:
             """ Handle HTTP Auth. """
             mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-            mgr.add_password(None, self._host+":"+str(self._port), self._username, self._password)
+            mgr.add_password(None, self._host+":"+str(self._port),
+                             self._username, self._password)
             handler = urllib.request.HTTPBasicAuthHandler(mgr)
             self._opener = urllib.request.build_opener(handler)
             self._opener.addheaders = [('User-agent', 'Mozilla/5.0')]
@@ -97,10 +99,9 @@ class EnigmaNotify(BaseNotificationService):
         try:
             return self._opener.open(uri, timeout=10).read().decode('UTF8')
         except (HTTPError, URLError, ConnectionRefusedError):
-            _LOGGER.exception("Enigma: [request_call] - Error connecting to remote enigma %s: %s ",\
-                              self._host, HTTPError.code)
+            _LOGGER.exception("Enigma: [request_call] - Error connecting to \
+                               remote enigma %s: %s ", self._host, HTTPError.code)
             return False
-
 
     @asyncio.coroutine
     def async_send_message(self, message="", **kwargs):
@@ -117,7 +118,7 @@ class EnigmaNotify(BaseNotificationService):
 
             _LOGGER.debug("Enigma notify service: [async_send_message] - Sending Message %s \
                            (timeout=%s and type=%s", message, displaytime, messagetype)
-            self.request_call('/web/message?text=' + message.replace(" ", "%20") + '&type=' +\
+            self.request_call('/web/message?text=' + message.replace(" ", "%20") + '&type=' +
                               messagetype + '&timeout=' + displaytime)
-        except subprocess.SubprocessError:
+        except ImportError:
             _LOGGER.error("Enigma notify service: [Exception raised]")
