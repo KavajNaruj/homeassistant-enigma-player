@@ -19,6 +19,8 @@ You must install OpenWebif from your enigma2 image.
   - Supports authentication and multiple receivers
   - Sending notifications to the box (timeout and type of message can be selected)
   - Load sources from selected bouquet (thanks to madrian)
+  - Load icon from picon or from screenshot (use picon variable. Default is icon
+  from picon)
     
 # Tested with OpenWebif versions:
   - 0.2.7
@@ -42,7 +44,7 @@ Install BeautifoulSoup:
 $ python3 -m pip install BeautifoulSoup4
 ```
 
-# Configuration Example (for both components):
+# Configuration Example (for both components anc icon from picon):
 By Default will load all channels from first bouquet
 ``` python
 media_player:
@@ -54,6 +56,7 @@ media_player:
     timeout: 20
     username: root
     password: !secret enigma_password
+    picon: picon
 
 notify:
 - platform: enigma
@@ -66,7 +69,7 @@ notify:
     password: !secret enigma_password
 ```
 
-# Configuration Example 2 (using a pre-defined bouquet):
+# Configuration Example 2 (using a pre-defined bouquet and icon from screenshot):
 To get your bouquet references, open in your browser : http://box.ip/web/getservices
 
 
@@ -96,6 +99,7 @@ media_player:
     username: root
     password: !secret enigma_password
     bouquet: '1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.dbe1e.tv" ORDER BY bouquet'
+    picon: screenshot
 ```
 
 
