@@ -36,7 +36,7 @@ Copy both directories (`media_player` and `notify`) also to the same directory `
 
 The custom components directory is inside your Home Assistant configuration directory.
 
-# Configuration Example (for both components anc icon from picon):
+# Configuration Example:
 By Default will load all channels from first bouquet
 
 ```yaml 
