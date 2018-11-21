@@ -49,6 +49,14 @@ enigma:
       username: root
       password: your_password
       picon: picon
+
+notify:
+  - platform: enigma
+    host: 192.168.1.20
+    port: 80
+    username: root
+    password: your_password
+    name: gigablue
 ```
 
 # Configuration Example 2 (using multiple devices and a pre-defined bouquet and icon from screenshot):
