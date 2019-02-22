@@ -23,19 +23,28 @@ You must install OpenWebif from your enigma2 image.
   - Sending notifications to the box (timeout and type of message can be selected)
   from picon)
     
+# Minimum Requirements
+  - Homeassistant 0.88
+
 # Tested with OpenWebif versions:
   - 0.2.7
   - 1.3.0
 
 # Install:
-To use the enigma custom component, place the file `enigma.py` from the root of
+To use the enigma custom component, place the file `enigma` directory from the root of
 the repositorie in to the folder `~/.homeassistant/custom_components/` where
 you have your home assistant installation
 
-Copy both directories (`media_player` and `notify`) also to the same directory `~/.homeassistant/custom_components/`
-
 The custom components directory is inside your Home Assistant configuration directory.
 
+This is how your custom_components directory should be:
+```bash
+custom_components
+├── enigma
+│   ├── __init__.py
+│   ├── media_player.py
+│   └── notify.py
+```
 # Configuration Example:
 By Default will load all channels from first bouquet
 
@@ -96,17 +105,6 @@ enigma:
       timeout: 20
       bouquet: '1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.dbe1e.tv" ORDER BY bouquet' 
       picon: screenshot
-```
-This is how your custom_components directory should be:
-```bash
-custom_components
-├── enigma.py
-├── media_player
-│   ├── enigma.py
-│   └── __
-├── notify
-│   ├── enigma.py
-
 ```
 
 # Notifications
