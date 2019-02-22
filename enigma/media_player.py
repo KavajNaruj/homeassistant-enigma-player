@@ -24,11 +24,12 @@ import voluptuous as vol
 # From homeassitant
 
 from custom_components.enigma import _LOGGER, DOMAIN as ENIGMA_DOMAIN
-from homeassistant.components.media_player import (
+from homeassistant.components.media_player.const import (
     MEDIA_TYPE_CHANNEL, MEDIA_TYPE_TVSHOW, SUPPORT_NEXT_TRACK, SUPPORT_PLAY,
     SUPPORT_PLAY_MEDIA, SUPPORT_PREVIOUS_TRACK, SUPPORT_SELECT_SOURCE,
     SUPPORT_TURN_OFF, SUPPORT_TURN_ON, SUPPORT_VOLUME_MUTE, SUPPORT_VOLUME_SET,
-    SUPPORT_VOLUME_STEP, MediaPlayerDevice)
+    SUPPORT_VOLUME_STEP)
+from homeassistant.components.media_player import MediaPlayerDevice
 from homeassistant.const import (STATE_OFF, STATE_ON, STATE_UNKNOWN)
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
