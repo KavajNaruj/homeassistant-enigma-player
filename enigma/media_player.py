@@ -35,7 +35,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 
 # VERSION
-VERSION = '1.0'
+VERSION = '1.1'
 
 # Dependencies
 DEPENDENCIES = ['enigma']
