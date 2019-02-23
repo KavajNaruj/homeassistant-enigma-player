@@ -28,6 +28,9 @@ from homeassistant.const import (
     CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
 
+# VERSION
+VERSION = '1.0'
+
 # Default value for display (if not passed as argument in data field)
 # 20 seconds for timeout
 DEFAULT_DISPLAY_TIME = '20'
