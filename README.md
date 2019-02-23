@@ -133,6 +133,19 @@ you channel number):
 }
 ```
 
+# Custom updater
+If you want this custom component to be auto updated, please add the
+configuration below to your configuration.yaml
+Make sure you've the custom_updater component installed and working - https://github.com/custom-components/custom_updater/ 
+
+Add a new reference under component_urls in your custom_updater configuration in configuration.yaml.
+```yaml
+custom_updater:
+  component_urls:
+    - https://raw.githubusercontent.com/cinzas/homeassistant-enigma-player/master/custom_components.json
+```
+
+
 # Screenshots
 Current channel (example 1)
 
