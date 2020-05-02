@@ -8,7 +8,8 @@ https://home-assistant.io/components/enigma/
 import logging
 import urllib.parse
 import urllib.request
-
+import aiohttp
+import asyncio
 import voluptuous as vol
 
 from homeassistant.const import (
@@ -18,7 +19,7 @@ from homeassistant.helpers import config_validation as cv, discovery
 from homeassistant.helpers.entity import Entity
 
 # VERSION
-VERSION = '1.1'
+VERSION = '1.2'
 
 # REQUIREMENTS
 REQUIREMENTS = ['beautifulsoup4==4.6.3']
@@ -141,21 +142,7 @@ class EnigmaDevice(Entity):
         self._source_names = {}
         self._sources = {}
         # Opener for http connection
-        self._opener = False
-
-        # Check if is password enabled
-        if self._password is not None:
-            # Handle HTTP Auth
-            mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-            mgr.add_password(None, self._host+":"+str(self._port),
-                             self._username, self._password)
-            handler = urllib.request.HTTPBasicAuthHandler(mgr)
-            self._opener = urllib.request.build_opener(handler)
-            self._opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        else:
-            handler = urllib.request.HTTPHandler()
-            self._opener = urllib.request.build_opener(handler)
-            self._opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        self._opener = aiohttp.ClientSession()
 
     @property
     def get_host(self):

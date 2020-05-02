@@ -12,6 +12,7 @@ https://home-assistant.io/components/enigma/
 #
 # imports and dependecies
 import asyncio
+import aiohttp
 from urllib.error import HTTPError, URLError
 import urllib.parse
 import urllib.request
@@ -29,7 +30,7 @@ from homeassistant.const import (
 import homeassistant.helpers.config_validation as cv
 
 # VERSION
-VERSION = '1.1'
+VERSION = '1.2'
 
 # Default value for display (if not passed as argument in data field)
 # 20 seconds for timeout
@@ -76,36 +77,30 @@ class EnigmaNotify(BaseNotificationService):
         self._username = username
         self._password = password
         # Opener for http connection
-        self._opener = False
+        self._opener = aiohttp.ClientSession()
 
-        # With auth
-        if self._password:
-            # Handle HTTP Auth
-            mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-            mgr.add_password(None, self._host+":"+str(self._port),
-                             self._username, self._password)
-            handler = urllib.request.HTTPBasicAuthHandler(mgr)
-            self._opener = urllib.request.build_opener(handler)
-            self._opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        else:
-            handler = urllib.request.HTTPHandler()
-            self._opener = urllib.request.build_opener(handler)
-            self._opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-
-    def request_call(self, url):
+    # Async API requests
+    async def request_call(self, url):
         """Call web API request."""
         uri = 'http://' + self._host + ":" + str(self._port) + url
         _LOGGER.debug("Enigma: [request_call] - Call request %s ", uri)
         try:
-            return self._opener.open(uri, timeout=10).read().decode('UTF8')
-        except (HTTPError, URLError, ConnectionRefusedError):
+            # Check if is password enabled
+            if self._password is not None:
+                # Handle HTTP Auth
+                async with self._opener.get(uri, auth=aiohttp.BasicAuth(self._username, self._password)) as resp:
+                    text = await resp.read()
+                    return text
+            else:
+                async with self._opener.get(uri) as resp:
+                    text = await resp.read()
+                    return text
+        except:
             _LOGGER.exception("Enigma: [request_call] - Error connecting to \
-                              remote enigma %s: %s ", self._host,
-                              HTTPError.code)
-            return False
+                              remote enigma")
 
     @asyncio.coroutine
-    def async_send_message(self, message="", **kwargs):
+    async def async_send_message(self, message="", **kwargs):
         """Send message."""
         try:
             displaytime = DEFAULT_DISPLAY_TIME
@@ -120,7 +115,7 @@ class EnigmaNotify(BaseNotificationService):
             _LOGGER.debug("Enigma notify service: [async_send_message] - Sending Message %s \
                           (timeout=%s and type=%s", message, displaytime,
                           messagetype)
-            self.request_call('/web/message?text=' +
+            await self.request_call('/web/message?text=' +
                               message.replace(" ", "%20") + '&type=' +
                               messagetype + '&timeout=' + displaytime)
         except ImportError:
