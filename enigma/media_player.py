@@ -32,7 +32,7 @@ from homeassistant.components.media_player.const import (
     SUPPORT_PLAY_MEDIA, SUPPORT_PREVIOUS_TRACK, SUPPORT_SELECT_SOURCE,
     SUPPORT_TURN_OFF, SUPPORT_TURN_ON, SUPPORT_VOLUME_MUTE, SUPPORT_VOLUME_SET,
     SUPPORT_VOLUME_STEP)
-from homeassistant.components.media_player import MediaPlayerDevice
+from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.const import (STATE_OFF, STATE_ON, STATE_UNKNOWN)
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
@@ -80,20 +80,20 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 
 # Enigma Media Player Device
-class EnigmaMediaPlayer(MediaPlayerDevice):
+class EnigmaMediaPlayer(MediaPlayerEntity):
     """Representation of a Enigma Media Player device."""
 
-    def __init__(self, EnigmaMediaPlayerDevice):
+    def __init__(self, EnigmaMediaPlayerEntity):
         """Initialize the Enigma device."""
-        self._host = EnigmaMediaPlayerDevice.get_host
-        self._port = EnigmaMediaPlayerDevice.get_port
-        self._name = EnigmaMediaPlayerDevice.get_name
-        self._username = EnigmaMediaPlayerDevice.get_username
-        self._password = EnigmaMediaPlayerDevice.get_password
-        self._timeout = EnigmaMediaPlayerDevice.get_timeout
-        self._bouquet = EnigmaMediaPlayerDevice.get_bouquet
-        self._picon = EnigmaMediaPlayerDevice.get_picon
-        self._opener = EnigmaMediaPlayerDevice.get_opener
+        self._host = EnigmaMediaPlayerEntity.get_host
+        self._port = EnigmaMediaPlayerEntity.get_port
+        self._name = EnigmaMediaPlayerEntity.get_name
+        self._username = EnigmaMediaPlayerEntity.get_username
+        self._password = EnigmaMediaPlayerEntity.get_password
+        self._timeout = EnigmaMediaPlayerEntity.get_timeout
+        self._bouquet = EnigmaMediaPlayerEntity.get_bouquet
+        self._picon = EnigmaMediaPlayerEntity.get_picon
+        self._opener = EnigmaMediaPlayerEntity.get_opener
         self._pwstate = True
         self._volume = 0
         self._muted = False
