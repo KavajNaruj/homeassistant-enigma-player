@@ -178,7 +178,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         """Import BeautifulSoup."""
         from bs4 import BeautifulSoup
         # Get the latest details from the device.
-        _LOGGER.info("Enigma: [update] - request for host %s (%s)", self._host,
+        _LOGGER.debug("Enigma: [update] - request for host %s (%s)", self._host,
                      self._name)
         powerstate_xml = await self.request_call('/web/powerstate')
         powerstate_soup = BeautifulSoup(powerstate_xml, 'html.parser')
