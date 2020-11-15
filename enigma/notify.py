@@ -10,9 +10,10 @@ https://home-assistant.io/components/enigma/
 # https://github.com/cinzas/homeassistant-enigma-player
 #
 #
-# imports and dependecies
+# imports and dependencies
 import asyncio
 import aiohttp
+from aiohttp.client_exceptions import ClientError
 from urllib.error import HTTPError, URLError
 import urllib.parse
 import urllib.request
@@ -27,7 +28,8 @@ from homeassistant.components.notify import (
 from homeassistant.const import (
     CONF_HOST, CONF_NAME, CONF_PASSWORD, CONF_PORT,
     CONF_USERNAME)
-import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers import aiohttp_client, config_validation as cv
+
 
 # VERSION
 VERSION = '1.2'
@@ -52,16 +54,20 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-async def get_service(hass, config, discovery_info=None):
+def get_service(hass, config, discovery_info=None):
     """Initialize the enigma notify service."""
     if config.get(CONF_HOST) is not None:
+        _LOGGER.info("[Enigma Notify] Adding Enigma receiver at host %s initialized",
+                     config.get(CONF_HOST))
+        # Opener for http connection
+        session = aiohttp_client.async_get_clientsession(hass)
         enigma = EnigmaNotify(config.get(CONF_HOST),
                               config.get(CONF_PORT),
                               config.get(CONF_NAME),
                               config.get(CONF_USERNAME),
-                              config.get(CONF_PASSWORD))
-
-        _LOGGER.info("[Enigma Notify] Enigma receiver at host %s initialized",
+                              config.get(CONF_PASSWORD),
+                              session)
+        _LOGGER.info("[Enigma Notify] Added Enigma receiver at host %s initialized",
                      config.get(CONF_HOST))
     return enigma
 
@@ -69,21 +75,21 @@ async def get_service(hass, config, discovery_info=None):
 class EnigmaNotify(BaseNotificationService):
     """Representation of a notification service for Enigma device."""
 
-    def __init__(self, host, port, name, username, password):
+    def __init__(self, host, port, name, username, password, opener):
         """Initialize the Enigma device."""
         self._host = host
         self._port = port
         self._name = name
         self._username = username
         self._password = password
-        # Opener for http connection
-        self._opener = aiohttp.ClientSession()
+        # self._opener = aiohttp.ClientSession()
+        self._opener = opener
 
     # Async API requests
     async def request_call(self, url):
         """Call web API request."""
         uri = 'http://' + self._host + ":" + str(self._port) + url
-        _LOGGER.debug("Enigma: [request_call] - Call request %s ", uri)
+        _LOGGER.debug("[Enigma Notify]: [request_call] - Call request %s ", uri)
         try:
             # Check if is password enabled
             if self._password is not None:
@@ -96,7 +102,7 @@ class EnigmaNotify(BaseNotificationService):
                     text = await resp.read()
                     return text
         except:
-            _LOGGER.exception("Enigma: [request_call] - Error connecting to \
+            _LOGGER.exception("[Enigma Notify]: [request_call] - Error connecting to \
                               remote enigma")
 
     @asyncio.coroutine
