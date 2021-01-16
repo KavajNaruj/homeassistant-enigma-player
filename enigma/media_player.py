@@ -98,6 +98,8 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         self._volume = 0
         self._muted = False
         self._selected_source = ''
+        self._selected_media_content_id = ''
+        self._selected_media_title = ''
         self._picon_url = None
         self._source_names = {}
         self._sources = {}
@@ -209,7 +211,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
             soup = BeautifulSoup(subservices_xml, 'html.parser')
             servicename = soup.e2servicename.renderContents().decode('UTF8')
             reference = soup.e2servicereference.renderContents().decode('UTF8')
-
+            eventid = 'N/A'
             eventtitle = 'N/A'
             # If we got a valid reference, check the title of the event and
             # the picon url
@@ -218,6 +220,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
                 xml = await self.request_call('/web/epgservicenow?sRef=' + reference)
                 soup = BeautifulSoup(xml, 'html.parser')
                 eventtitle = soup.e2eventtitle.renderContents().decode('UTF8')
+                eventid = soup.e2eventid.renderContents().decode('UTF8')
                 if self._password != DEFAULT_PASSWORD:
                     # if icon = screenhost then get screenshot
                     if self._picon == 'screenshot':
@@ -269,8 +272,10 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
             _LOGGER.debug("Enigma: [update] - Is host %s muted = %s",
                           self._host, volmuted)
 
-            # Concatenate Channel and Title name to display
-            self._selected_source = (servicename + ' - ' + eventtitle)
+            # Info of selected source and title
+            self._selected_source = servicename 
+            self._selected_media_content_id = eventid
+            self._selected_media_title = servicename + ' - ' + eventtitle
         return True
 
 # GET - Name
@@ -318,13 +323,13 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
     @property
     def media_content_id(self):
         """Service Ref of current playing media."""
-        return self._selected_source
+        return self._selected_media_content_id
 
 # GET - Media title - Current Channel name
     @property
     def media_title(self):
         """Title of current playing media."""
-        return self._selected_source
+        return self._selected_media_title
 
 # GET - Content picon - Current Channel Picon
 # /picon directory must exist in enigma2 box (use symlink if not)
