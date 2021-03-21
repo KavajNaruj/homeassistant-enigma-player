@@ -28,10 +28,20 @@ from urllib.error import HTTPError, URLError
 
 from custom_components.enigma import _LOGGER, DOMAIN as ENIGMA_DOMAIN
 from homeassistant.components.media_player.const import (
-    MEDIA_TYPE_CHANNEL, MEDIA_TYPE_TVSHOW, SUPPORT_NEXT_TRACK, SUPPORT_PLAY,
-    SUPPORT_PLAY_MEDIA, SUPPORT_PREVIOUS_TRACK, SUPPORT_SELECT_SOURCE,
-    SUPPORT_TURN_OFF, SUPPORT_TURN_ON, SUPPORT_VOLUME_MUTE, SUPPORT_VOLUME_SET,
-    SUPPORT_VOLUME_STEP)
+    MEDIA_TYPE_CHANNEL,
+    MEDIA_TYPE_TVSHOW,
+    SUPPORT_NEXT_TRACK,
+    SUPPORT_PLAY,
+    SUPPORT_PAUSE,
+    SUPPORT_PLAY_MEDIA,
+    SUPPORT_PREVIOUS_TRACK,
+    SUPPORT_SELECT_SOURCE,
+    SUPPORT_TURN_OFF,
+    SUPPORT_TURN_ON,
+    SUPPORT_VOLUME_MUTE,
+    SUPPORT_VOLUME_SET,
+    SUPPORT_VOLUME_STEP
+ )
 from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.const import (STATE_OFF, STATE_ON, STATE_UNKNOWN)
 import homeassistant.helpers.config_validation as cv
@@ -56,11 +66,19 @@ DEFAULT_PICON = 'picon'
 MIN_TIME_BETWEEN_SCANS = timedelta(seconds=10)
 MIN_TIME_BETWEEN_FORCED_SCANS = timedelta(seconds=5)
 
-SUPPORT_ENIGMA = SUPPORT_VOLUME_SET | SUPPORT_VOLUME_MUTE | \
-                 SUPPORT_TURN_ON | SUPPORT_TURN_OFF | \
-                 SUPPORT_SELECT_SOURCE | SUPPORT_NEXT_TRACK | \
-                 SUPPORT_PREVIOUS_TRACK | SUPPORT_VOLUME_STEP | \
-                 SUPPORT_PLAY | SUPPORT_PLAY_MEDIA
+SUPPORT_ENIGMA = (
+    SUPPORT_VOLUME_SET
+    | SUPPORT_VOLUME_MUTE
+    | SUPPORT_TURN_ON
+    | SUPPORT_TURN_OFF
+    | SUPPORT_SELECT_SOURCE
+    | SUPPORT_NEXT_TRACK
+    | SUPPORT_PREVIOUS_TRACK
+    | SUPPORT_VOLUME_STEP
+    | SUPPORT_PLAY
+    | SUPPORT_PLAY_MEDIA
+    | SUPPORT_PAUSE
+)
 
 MAX_VOLUME = 100
 
@@ -382,6 +400,25 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
     async def async_mute_volume(self, mute):
         """Mute or unmute media player."""
         await self.request_call('/web/vol?set=mute')
+
+# SET - Media Play/pause
+    @asyncio.coroutine
+    async def async_media_play_pause(self):
+        """Simulate play pause media player."""
+        _LOGGER.debug("Enigma: [play_pause_toogle] - Does nothing")
+
+# SET - Media Play
+    @asyncio.coroutine
+    async def async_media_play(self):
+        """Send play command."""
+        _LOGGER.debug("Enigma: [play] - Does nothing")
+
+# SET - Media Pause
+    @asyncio.coroutine
+    async def async_media_pause(self):
+        """Send media pause command to media player."""
+        _LOGGER.debug("Enigma: [pause] - Does nothing")
+
 
 # SET - Change to channel number
     @asyncio.coroutine

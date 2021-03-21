@@ -1,0 +1,11 @@
+{
+  "domain": "enigma",
+  "name": "Enigma2 Integration",
+  "version" : "1.4",
+  "documentation": "https://github.com/cinzas/homeassistant-enigma-player",
+  "issue_tracker": "https://github.com/cinzas/homeassistant-enigma-player/issues",
+  "dependencies": [],
+  "after_dependencies": [],
+  "codeowners": ["@cinzas"],
+  "requirements": ["beautifulsoup4==4.6.3"]
+}
