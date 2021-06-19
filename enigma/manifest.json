@@ -7,5 +7,5 @@
   "dependencies": [],
   "after_dependencies": [],
   "codeowners": ["@cinzas"],
-  "requirements": ["beautifulsoup4==4.6.3"]
+  "requirements": ["beautifulsoup4>=4.6.3"]
 }
