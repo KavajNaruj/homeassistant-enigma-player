@@ -1,5 +1,4 @@
 name: Validate with HACS Action
-uses: hacs/action@22.5.0
 
 on:
   push:
