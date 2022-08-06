@@ -1,18 +1,4 @@
-name: Validate with HACS Action
-
-on:
-  workflow_dispatch:
-  push:
-  pull_request:
-  schedule:
-    - cron: "0 0 * * *"
-
-jobs:
-  hacs:
-    name: HACS Action
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: HACS Action
-        uses: "hacs/action@main"
-        with:
-          category: "plugin"
+name: HACS validation
+uses: "hacs/action@22.5.0"
+with:
+  category: "integration"
