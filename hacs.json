@@ -1,5 +1,4 @@
 {
   "name": "Enigma2 + OpenWebIF integration - media_player and notify platforms",
-  "domains": ["media_player", "notify"],
   "render_readme": true
 }
