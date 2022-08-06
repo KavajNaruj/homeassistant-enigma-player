@@ -48,7 +48,9 @@ custom_components
 
 # Install with HACS:
 Because enigma2 is already a core component of HA, it is not possible to add it to the default HACS store.
+
 However it is possible to add it as a custom repository.
+
 If you are using HACS, go to HACS -> Integrations and click on the 3 dots (top righ corner).
 Then choose custom repositories, and add this repository url (https://github.com/cinzas/homeassistant-enigma-player), choosing the Integration category.
 
