@@ -8,6 +8,5 @@
   "after_dependencies": [],
   "codeowners": ["@cinzas"],
   "iot_class": "local_polling",
-  "requirements": ["beautifulsoup4>=4.6.3"],
-  "config_flow": true
+  "requirements": ["beautifulsoup4>=4.6.3"]
 }
