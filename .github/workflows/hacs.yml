@@ -1,4 +1,24 @@
-name: HACS validation
-uses: "hacs/action@22.5.0"
-with:
-  category: "integration"
+name: HACS and HASSFEST validation
+
+jobs: 
+  hacs:
+    runs-on: "ubuntu-latest"
+    name: HACS
+    steps:
+      - name: Check out the repository
+        uses: "actions/checkout@v3.0.2"
+
+      - name: HACS validation
+        uses: "hacs/action@22.5.0"
+        with:
+          category: "integration"
+
+  hassfest:
+    runs-on: "ubuntu-latest"
+    name: Hassfest
+    steps:
+      - name: Check out the repository
+        uses: "actions/checkout@v3.0.2"
+
+      - name: Hassfest validation
+        uses: "home-assistant/actions/hassfest@master"
