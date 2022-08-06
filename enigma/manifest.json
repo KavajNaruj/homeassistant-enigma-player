@@ -1,6 +1,6 @@
 {
   "domain": "enigma",
-  "name": "Enigma2 Integration",
+  "name": "Enigma2 addon",
   "version" : "1.4",
   "documentation": "https://github.com/cinzas/homeassistant-enigma-player",
   "issue_tracker": "https://github.com/cinzas/homeassistant-enigma-player/issues",
