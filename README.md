@@ -45,6 +45,19 @@ custom_components
 │   ├── media_player.py
 │   └── notify.py
 ```
+
+# Install with HACS:
+Because enigma2 is already a core component of HA, it is not possible to add it to the default HACS store.
+However it is possible to add it as a custom repository.
+If you are using HACS, go to HACS -> Integrations and click on the 3 dots (top righ corner).
+Then choose custom repositories, and add this repository url (https://github.com/cinzas/homeassistant-enigma-player), choosing the Integration category.
+
+![HACS custom repository](../master/screenshots/7.png)
+
+That's it, and you will be notified by HACS on every release.
+Just click on upgrade.
+
+
 # Configuration Example:
 By Default will load all channels from first bouquet
 
@@ -131,18 +144,6 @@ you channel number):
   "media_content_id" : "5",
   "media_content_type" : "channel"
 }
-```
-
-# Custom updater
-If you want this custom component to be auto updated, please add the
-configuration below to your configuration.yaml
-Make sure you've the custom_updater component installed and working - https://github.com/custom-components/custom_updater/ 
-
-Add a new reference under component_urls in your custom_updater configuration in configuration.yaml.
-```yaml
-custom_updater:
-  component_urls:
-    - https://raw.githubusercontent.com/cinzas/homeassistant-enigma-player/master/custom_components.json
 ```
 
 
