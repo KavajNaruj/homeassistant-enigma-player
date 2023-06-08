@@ -30,6 +30,10 @@ You must install OpenWebif from your enigma2 image.
   - 0.2.7
   - 1.3.0
 
+# Discussion:
+Follow the enigma2 integration discussion on [Home Assistant community forum][2].
+
+
 # Install:
 To use the enigma custom component, place the file `enigma` directory from the root of
 the repositorie in to the folder `~/.homeassistant/custom_components/` where
@@ -189,4 +193,5 @@ joao.amaro@gmail.com
 # References
 
 [1]: https://home-assistant.io
+[2]: https://community.home-assistant.io/t/enigma2-receivers-integration/44448
 

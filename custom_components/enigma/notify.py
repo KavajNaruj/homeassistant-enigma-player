@@ -32,7 +32,7 @@ from homeassistant.helpers import aiohttp_client, config_validation as cv
 
 
 # VERSION
-VERSION = '1.4'
+VERSION = '1.6'
 
 # Default value for display (if not passed as argument in data field)
 # 20 seconds for timeout
@@ -105,7 +105,6 @@ class EnigmaNotify(BaseNotificationService):
             _LOGGER.exception("[Enigma Notify]: [request_call] - Error connecting to \
                               remote enigma")
 
-    @asyncio.coroutine
     async def async_send_message(self, message="", **kwargs):
         """Send message."""
         try:

@@ -48,7 +48,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 
 # VERSION
-VERSION = '1.3'
+VERSION = '1.6'
 
 # Dependencies
 DEPENDENCIES = ['enigma']
@@ -141,7 +141,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
                                                (self._bouquet))
 
             # Channels name
-            soup = BeautifulSoup(epgbouquet_xml, 'html.parser')
+            soup = BeautifulSoup(epgbouquet_xml, 'lxml')
             src_names = soup.find_all('e2eventservicename')
             self._source_names = [src_name.string for src_name in src_names]
             # Channels reference
@@ -158,7 +158,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
             epgbouquet_xml = await self.request_call('/web/epgnow?bRef=' + reference)
 
             # Channels name
-            soup = BeautifulSoup(epgbouquet_xml, 'html.parser')
+            soup = BeautifulSoup(epgbouquet_xml, 'lxml')
             src_names = soup.find_all('e2eventservicename')
             self._source_names = [src_name.string for src_name in src_names]
 
@@ -173,7 +173,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         from bs4 import BeautifulSoup
         # Get first bouquet reference
         bouquets_xml = await self.request_call('/web/getallservices')
-        soup = BeautifulSoup(bouquets_xml, 'html.parser')
+        soup = BeautifulSoup(bouquets_xml, 'lxml')
         return soup.find('e2servicereference').renderContents().decode('UTF8')
 
     # Asnc API requests
@@ -201,7 +201,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         _LOGGER.debug("Enigma: [update] - request for host %s (%s)", self._host,
                      self._name)
         powerstate_xml = await self.request_call('/web/powerstate')
-        powerstate_soup = BeautifulSoup(powerstate_xml, 'html.parser')
+        powerstate_soup = BeautifulSoup(powerstate_xml, 'lxml')
         pwstate = powerstate_soup.e2instandby.renderContents().decode('UTF8')
         self._pwstate = ''
 
@@ -216,7 +216,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         # If name was not defined, get the name from the box
         if self._name == 'Enigma2 Satelite':
             about_xml = await self.request_call('/web/about')
-            soup = BeautifulSoup(about_xml, 'html.parser')
+            soup = BeautifulSoup(about_xml, 'lxml')
             name = soup.e2model.renderContents().decode('UTF8')
             _LOGGER.debug("Enigma: [update] - Name for host %s = %s",
                           self._host, name)
@@ -226,7 +226,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         # If powered on
         if self._pwstate == 'false':
             subservices_xml = await self.request_call('/web/subservices')
-            soup = BeautifulSoup(subservices_xml, 'html.parser')
+            soup = BeautifulSoup(subservices_xml, 'lxml')
             servicename = soup.e2servicename.renderContents().decode('UTF8')
             reference = soup.e2servicereference.renderContents().decode('UTF8')
             eventid = 'N/A'
@@ -236,7 +236,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
             if reference != '' and reference != 'N/A' and \
                             not reference.startswith('1:0:0:0:0:0:0:0:0:0:'):
                 xml = await self.request_call('/web/epgservicenow?sRef=' + reference)
-                soup = BeautifulSoup(xml, 'html.parser')
+                soup = BeautifulSoup(xml, 'lxml')
                 eventtitle = soup.e2eventtitle.renderContents().decode('UTF8')
                 eventid = soup.e2eventid.renderContents().decode('UTF8')
                 if self._password != DEFAULT_PASSWORD:
@@ -279,7 +279,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
 
             # Check volume and if is muted and update self variables
             volume_xml = await self.request_call('/web/vol')
-            soup = BeautifulSoup(volume_xml, 'html.parser')
+            soup = BeautifulSoup(volume_xml, 'lxml')
             volcurrent = soup.e2current.renderContents().decode('UTF8')
             volmuted = soup.e2ismuted.renderContents().decode('UTF8')
 
@@ -370,58 +370,49 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         return self._source_names
 
 # SET - Change channel - From dropbox menu
-    @asyncio.coroutine
     async def async_select_source(self, source):
         """Select input source."""
         _LOGGER.debug("Enigma: [async_select_source] - Change source channel")
         await self.request_call('/web/zap?sRef=' + self._sources[source])
 
 # SET - Volume up
-    @asyncio.coroutine
     async def async_volume_up(self):
         """Set volume level up."""
         await self.request_call('/web/vol?set=up')
 
 # SET - Volume down
-    @asyncio.coroutine
     async def async_volume_down(self):
         """Set volume level down."""
         await self.request_call('/web/vol?set=down')
 
 # SET - Volume level
-    @asyncio.coroutine
     async def async_set_volume_level(self, volume):
         """Set volume level, range 0..1."""
         volset = str(round(volume * MAX_VOLUME))
         await self.request_call('/web/vol?set=set' + volset)
 
 # SET - Volume mute
-    @asyncio.coroutine
     async def async_mute_volume(self, mute):
         """Mute or unmute media player."""
         await self.request_call('/web/vol?set=mute')
 
 # SET - Media Play/pause
-    @asyncio.coroutine
     async def async_media_play_pause(self):
         """Simulate play pause media player."""
         _LOGGER.debug("Enigma: [play_pause_toogle] - Does nothing")
 
 # SET - Media Play
-    @asyncio.coroutine
     async def async_media_play(self):
         """Send play command."""
         _LOGGER.debug("Enigma: [play] - Does nothing")
 
 # SET - Media Pause
-    @asyncio.coroutine
     async def async_media_pause(self):
         """Send media pause command to media player."""
         _LOGGER.debug("Enigma: [pause] - Does nothing")
 
 
 # SET - Change to channel number
-    @asyncio.coroutine
     async def async_play_media(self, media_type, media_id, **kwargs):
         """Support changing a channel."""
         if media_type != MEDIA_TYPE_CHANNEL:
@@ -451,26 +442,22 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
             await self.request_call('/web/remotecontrol?command='+str(channel_digit))
 
 # SET - Turn on
-    @asyncio.coroutine
     async def async_turn_on(self):
         """Turn the media player on."""
         await self.request_call('/web/powerstate?newstate=4')
         self.async_update()
 
 # SET - Turn of
-    @asyncio.coroutine
     async def async_turn_off(self):
         """Turn off media player."""
         await self.request_call('/web/powerstate?newstate=5')
 
 # SET - Next channel
-    @asyncio.coroutine
     async def async_media_next_track(self):
         """Change to next channel."""
         await self.request_call('/web/remotecontrol?command=106')
 
 # SET - Previous channel
-    @asyncio.coroutine
     async def async_media_previous_track(self):
         """Change to previous channel."""
         await self.request_call('/web/remotecontrol?command=105')
