@@ -141,7 +141,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
                                                (self._bouquet))
 
             # Channels name
-            soup = BeautifulSoup(epgbouquet_xml, 'lxml')
+            soup = BeautifulSoup(epgbouquet_xml, features = "xml")
             src_names = soup.find_all('e2eventservicename')
             self._source_names = [src_name.string for src_name in src_names]
             # Channels reference
@@ -158,7 +158,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
             epgbouquet_xml = await self.request_call('/web/epgnow?bRef=' + reference)
 
             # Channels name
-            soup = BeautifulSoup(epgbouquet_xml, 'lxml')
+            soup = BeautifulSoup(epgbouquet_xml, features = "xml")
             src_names = soup.find_all('e2eventservicename')
             self._source_names = [src_name.string for src_name in src_names]
 
@@ -173,7 +173,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         from bs4 import BeautifulSoup
         # Get first bouquet reference
         bouquets_xml = await self.request_call('/web/getallservices')
-        soup = BeautifulSoup(bouquets_xml, 'lxml')
+        soup = BeautifulSoup(bouquets_xml, features = "xml")
         return soup.find('e2servicereference').renderContents().decode('UTF8')
 
     # Asnc API requests
@@ -201,7 +201,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         _LOGGER.debug("Enigma: [update] - request for host %s (%s)", self._host,
                      self._name)
         powerstate_xml = await self.request_call('/web/powerstate')
-        powerstate_soup = BeautifulSoup(powerstate_xml, 'lxml')
+        powerstate_soup = BeautifulSoup(powerstate_xml, features = "xml")
         pwstate = powerstate_soup.e2instandby.renderContents().decode('UTF8')
         self._pwstate = ''
 
@@ -216,7 +216,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         # If name was not defined, get the name from the box
         if self._name == 'Enigma2 Satelite':
             about_xml = await self.request_call('/web/about')
-            soup = BeautifulSoup(about_xml, 'lxml')
+            soup = BeautifulSoup(about_xml, features = "xml")
             name = soup.e2model.renderContents().decode('UTF8')
             _LOGGER.debug("Enigma: [update] - Name for host %s = %s",
                           self._host, name)
@@ -226,7 +226,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
         # If powered on
         if self._pwstate == 'false':
             subservices_xml = await self.request_call('/web/subservices')
-            soup = BeautifulSoup(subservices_xml, 'lxml')
+            soup = BeautifulSoup(subservices_xml, features = "xml")
             servicename = soup.e2servicename.renderContents().decode('UTF8')
             reference = soup.e2servicereference.renderContents().decode('UTF8')
             eventid = 'N/A'
@@ -236,7 +236,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
             if reference != '' and reference != 'N/A' and \
                             not reference.startswith('1:0:0:0:0:0:0:0:0:0:'):
                 xml = await self.request_call('/web/epgservicenow?sRef=' + reference)
-                soup = BeautifulSoup(xml, 'lxml')
+                soup = BeautifulSoup(xml, features = "xml")
                 eventtitle = soup.e2eventtitle.renderContents().decode('UTF8')
                 eventid = soup.e2eventid.renderContents().decode('UTF8')
                 if self._password != DEFAULT_PASSWORD:
@@ -279,7 +279,7 @@ class EnigmaMediaPlayer(MediaPlayerEntity):
 
             # Check volume and if is muted and update self variables
             volume_xml = await self.request_call('/web/vol')
-            soup = BeautifulSoup(volume_xml, 'lxml')
+            soup = BeautifulSoup(volume_xml, features = "xml")
             volcurrent = soup.e2current.renderContents().decode('UTF8')
             volmuted = soup.e2ismuted.renderContents().decode('UTF8')
 
