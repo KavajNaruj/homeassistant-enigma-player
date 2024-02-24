@@ -29,26 +29,27 @@ from urllib.error import HTTPError, URLError
 from custom_components.enigma import _LOGGER, DOMAIN as ENIGMA_DOMAIN
 from homeassistant.components.media_player.const import (
     MEDIA_TYPE_CHANNEL,
-    MEDIA_TYPE_TVSHOW,
-    SUPPORT_NEXT_TRACK,
-    SUPPORT_PLAY,
-    SUPPORT_PAUSE,
-    SUPPORT_PLAY_MEDIA,
-    SUPPORT_PREVIOUS_TRACK,
-    SUPPORT_SELECT_SOURCE,
-    SUPPORT_TURN_OFF,
-    SUPPORT_TURN_ON,
-    SUPPORT_VOLUME_MUTE,
-    SUPPORT_VOLUME_SET,
-    SUPPORT_VOLUME_STEP
+    MEDIA_TYPE_TVSHOW
  )
-from homeassistant.components.media_player import MediaPlayerEntity
-from homeassistant.const import (STATE_OFF, STATE_ON, STATE_UNKNOWN)
+
+from homeassistant.components.media_player import (
+    MediaPlayerEntity,
+    MediaPlayerEntityFeature,
+    MediaPlayerState,
+    MediaType
+)
+
+from homeassistant.const import (
+    STATE_OFF, 
+    STATE_ON, 
+    STATE_UNKNOWN
+)
+
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 
 # VERSION
-VERSION = '1.7'
+VERSION = '1.8'
 
 # Dependencies
 DEPENDENCIES = ['enigma']
@@ -67,17 +68,17 @@ MIN_TIME_BETWEEN_SCANS = timedelta(seconds=10)
 MIN_TIME_BETWEEN_FORCED_SCANS = timedelta(seconds=5)
 
 SUPPORT_ENIGMA = (
-    SUPPORT_VOLUME_SET
-    | SUPPORT_VOLUME_MUTE
-    | SUPPORT_TURN_ON
-    | SUPPORT_TURN_OFF
-    | SUPPORT_SELECT_SOURCE
-    | SUPPORT_NEXT_TRACK
-    | SUPPORT_PREVIOUS_TRACK
-    | SUPPORT_VOLUME_STEP
-    | SUPPORT_PLAY
-    | SUPPORT_PLAY_MEDIA
-    | SUPPORT_PAUSE
+    MediaPlayerEntityFeature.VOLUME_SET
+    | MediaPlayerEntityFeature.VOLUME_MUTE
+    | MediaPlayerEntityFeature.TURN_ON
+    | MediaPlayerEntityFeature.TURN_OFF
+    | MediaPlayerEntityFeature.SELECT_SOURCE
+    | MediaPlayerEntityFeature.NEXT_TRACK
+    | MediaPlayerEntityFeature.PREVIOUS_TRACK
+    | MediaPlayerEntityFeature.VOLUME_STEP
+    | MediaPlayerEntityFeature.PLAY
+    | MediaPlayerEntityFeature.PLAY_MEDIA
+    | MediaPlayerEntityFeature.PAUSE
 )
 
 MAX_VOLUME = 100
