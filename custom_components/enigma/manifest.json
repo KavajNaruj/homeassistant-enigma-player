@@ -1,0 +1,12 @@
+{
+  "domain": "enigma",
+  "name": "Enigma2 addon",
+  "version" : "1.8",
+  "documentation": "https://github.com/cinzas/homeassistant-enigma-player",
+  "issue_tracker": "https://github.com/cinzas/homeassistant-enigma-player/issues",
+  "dependencies": [],
+  "after_dependencies": [],
+  "codeowners": ["@cinzas"],
+  "iot_class": "local_polling",
+  "requirements": ["beautifulsoup4>=4.6.3"]
+}
